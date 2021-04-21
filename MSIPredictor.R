@@ -18,17 +18,16 @@ players = data[which(data$position != "team"),]
 players <- players[,colSums(is.na(players))<nrow(players)]
 dropInhibStuff = c("inhibitors","opp_inhibitors")
 players = players[,!(names(players) %in% dropInhibStuff)]
+summary(players)
 
+players$result <- as.numeric(players$result)
+players$firstbloodkill = as.factor(players$firstbloodkill)
+players$firstbloodassist = as.factor(players$firstbloodassist)
+players$firstbloodvictim = as.factor(players$firstbloodvictim)
 basedPlayersModel = lm(result ~ .-league-player-split-team-ban1-ban2-ban3-ban4-ban5-champion-playoffs-patch-playerid-golddiffat15-xpdiffat15-csdiffat15
                        -golddiffat10-xpdiffat10-csdiffat10-monsterkills-firstbloodassist, data = players)
 summary(basedPlayersModel)
 
-(playoffs-patch-playerid-deaths-doublekills-quadrakills-pentakills-
-    firstblood-firstbloodkill-firstbloodassist-damagetochampions-damagemitigatedperminute-wardskilled-totalgold-earnedgold-monsterkills-cspm-
-    opp_goldat10-opp_csat10-golddiffat10-xpdiffat10-csdiffat10-deathsat10-opp_killsat10-opp_assistsat10-opp_deathsat10-opp_xpat15-
-    opp_csat15-golddiffat15-xpdiffat15-csdiffat15)
-(triplekills-wcpm-visionscore-opp_deathsat15)
-(firstbloodvictim-dpm-vspm-opp_xpat10)
  
 
 # Humoring Yumply with how to use vision score to predict the victory
@@ -44,11 +43,38 @@ summary(visionScorePredSupp)
 # what we learned from the Yumply Theory, per minute is better than total
 
 # team processing
+library(tree)
+
 team = data[which(data$position == "team"),]
+team <- team[,colSums(is.na(team))<nrow(team)]
 
+team$result = as.factor(team$result)
 
+team$firstdragon = as.factor(team$firstdragon)
+team$firstblood = as.factor(team$firstblood)
+team$firstbaron = as.factor(team$firstbaron)
+team$firstherald = as.factor(team$firstherald)
+team$firstmidtower = as.factor(team$firstmidtower)
+team$firsttower = as.factor(team$firsttower)
+team$firsttothreetowers = as.factor(team$firsttothreetowers)
 
+team$firstdragon = as.numeric(team$firstdragon)
+team$firstblood = as.numeric(team$firstblood)
+team$firstbaron = as.numeric(team$firstbaron)
+team$firstherald = as.numeric(team$firstherald)
+team$firstmidtower = as.numeric(team$firstmidtower)
+team$firsttower = as.numeric(team$firsttower)
+team$firsttothreetowers = as.numeric(team$firsttothreetowers)
+team$result = as.numeric(team$result)
 
+team$
+
+lmTeam = lm(result~-league-player-split-team-ban1-ban2-ban3-ban4-ban5-champion-playoffs-patch-playerid-golddiffat15-xpdiffat15-csdiffat15
+            -golddiffat10-xpdiffat10-csdiffat10-monsterkills-infernals-mountains-clouds-oceans-elders, data=team)
+summary(lmTeam)
+treeTeam=tree(result~.,team)
+plot(treeTeam)
+text(treeTeam,pretty=0)
 
 
 
