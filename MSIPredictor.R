@@ -27,8 +27,10 @@ players$firstbloodvictim = as.factor(players$firstbloodvictim)
 basedPlayersModel = lm(result ~ .-league-player-split-team-ban1-ban2-ban3-ban4-ban5-champion-playoffs-patch-playerid-golddiffat15-xpdiffat15-csdiffat15
                        -golddiffat10-xpdiffat10-csdiffat10-monsterkills-firstbloodassist, data = players)
 summary(basedPlayersModel)
-
+glmPlayer = glm(result ~ .-league-player-split-team-ban1-ban2-ban3-ban4-ban5-champion-playoffs-patch-playerid-golddiffat15-xpdiffat15-csdiffat15
+                       -golddiffat10-xpdiffat10-csdiffat10-monsterkills-firstbloodassist, data = players)
  
+summary(glmPlayer)
 
 # Humoring Yumply with how to use vision score to predict the victory
 visionScorePred = lm(result ~ visionscore, data = players) #bad way
@@ -47,7 +49,8 @@ library(tree)
 
 team = data[which(data$position == "team"),]
 team <- team[,colSums(is.na(team))<nrow(team)]
-
+team = team[,!(names(team) %in% "position")]
+team = na.omit(team)
 team$result = as.factor(team$result)
 
 team$firstdragon = as.factor(team$firstdragon)
@@ -67,12 +70,17 @@ team$firsttower = as.numeric(team$firsttower)
 team$firsttothreetowers = as.numeric(team$firsttothreetowers)
 team$result = as.numeric(team$result)
 
-team$
 
-lmTeam = lm(result~-league-player-split-team-ban1-ban2-ban3-ban4-ban5-champion-playoffs-patch-playerid-golddiffat15-xpdiffat15-csdiffat15
-            -golddiffat10-xpdiffat10-csdiffat10-monsterkills-infernals-mountains-clouds-oceans-elders, data=team)
+lmTeam = lm(result~.-league-split-playoffs-patch-playerid-side-player-team
+            -champion-ban1-ban2-ban3-ban4-ban5, data=team)
 summary(lmTeam)
-treeTeam=tree(result~.,team)
+treeTeamFT=tree(result~firsttower,data = team)
+summary(treeTeamFT)
+treeTeamEGPM=tree(result~earned.gpm,data = team)
+summary(treeTeamEGPM)
+treeTeamFTEGPM = tree(result~firsttower+earned.gpm, data = team)
+summary(treeTeamFTEGPM)
+
 plot(treeTeam)
 text(treeTeam,pretty=0)
 
