@@ -51,8 +51,8 @@ team = data[which(data$position == "team"),]
 team <- team[,colSums(is.na(team))<nrow(team)]
 team = team[,!(names(team) %in% "position")]
 team = na.omit(team)
-team$result = as.factor(team$result)
 
+team$result = as.factor(team$result)
 team$firstdragon = as.factor(team$firstdragon)
 team$firstblood = as.factor(team$firstblood)
 team$firstbaron = as.factor(team$firstbaron)
@@ -60,7 +60,7 @@ team$firstherald = as.factor(team$firstherald)
 team$firstmidtower = as.factor(team$firstmidtower)
 team$firsttower = as.factor(team$firsttower)
 team$firsttothreetowers = as.factor(team$firsttothreetowers)
-
+# Hi -Jimmy
 team$firstdragon = as.numeric(team$firstdragon)
 team$firstblood = as.numeric(team$firstblood)
 team$firstbaron = as.numeric(team$firstbaron)
@@ -70,24 +70,25 @@ team$firsttower = as.numeric(team$firsttower)
 team$firsttothreetowers = as.numeric(team$firsttothreetowers)
 team$result = as.numeric(team$result)
 
-
-lmTeam = lm(result~.-league-split-playoffs-patch-playerid-side-player-team
-            -champion-ban1-ban2-ban3-ban4-ban5, data=team)
+library(dplyr)
+lmTeam = lm(result~ ., data= subset(team, select=-c(league, split, playoffs, patch, playerid, side,                                                     player, team, champion, ban1, ban2, ban3, ban4, ban5)))
+# Michael
 summary(lmTeam)
+
+treeTeam = tree(result~., data = team)
+summary(treeTeam)
 treeTeamFT=tree(result~firsttower,data = team)
 summary(treeTeamFT)
+treeTeamFT3 = tree(result~firsttothreetowers, data = team)
+summary(treeTeamFT3)
 treeTeamEGPM=tree(result~earned.gpm,data = team)
 summary(treeTeamEGPM)
-treeTeamFTEGPM = tree(result~firsttower+earned.gpm, data = team)
-summary(treeTeamFTEGPM)
+treeTeamInhib = tree(result~inhibitors, data = team)
+summary(treeTeamInhib)
 
+# smells
 plot(treeTeam)
 text(treeTeam,pretty=0)
-
-
-
-
-
 
 # All Regions in MSI
 lcs = data[which(data$league == "LCS"),]
