@@ -53,38 +53,32 @@ team = team[,!(names(team) %in% "position")]
 team = na.omit(team)
 
 team$result = as.factor(team$result)
-team$firstdragon = as.factor(team$firstdragon)
-team$firstblood = as.factor(team$firstblood)
-team$firstbaron = as.factor(team$firstbaron)
-team$firstherald = as.factor(team$firstherald)
-team$firstmidtower = as.factor(team$firstmidtower)
-team$firsttower = as.factor(team$firsttower)
-team$firsttothreetowers = as.factor(team$firsttothreetowers)
-# Hi -Jimmy
-team$firstdragon = as.numeric(team$firstdragon)
-team$firstblood = as.numeric(team$firstblood)
-team$firstbaron = as.numeric(team$firstbaron)
-team$firstherald = as.numeric(team$firstherald)
-team$firstmidtower = as.numeric(team$firstmidtower)
-team$firsttower = as.numeric(team$firsttower)
-team$firsttothreetowers = as.numeric(team$firsttothreetowers)
 team$result = as.numeric(team$result)
+n=nrow(team)
+train = sample(1:n, n/2)
+
 
 library(dplyr)
 lmTeam = lm(result~ ., data= subset(team, select=-c(league, split, playoffs, patch, playerid, side,                                                     player, team, champion, ban1, ban2, ban3, ban4, ban5)))
 # Michael
 summary(lmTeam)
 
-treeTeam = tree(result~., data = team)
+treeTeam = tree(result~.-inhibitors-opp_towers-opp_inhibitors-towers-earnedgold-deaths-assists
+                -damagetochampions-teamdeaths-ckpm-damagetakenperminute-opp_barons-league, data = team, subset=train)
 summary(treeTeam)
-treeTeamFT=tree(result~firsttower,data = team)
-summary(treeTeamFT)
-treeTeamFT3 = tree(result~firsttothreetowers, data = team)
-summary(treeTeamFT3)
-treeTeamEGPM=tree(result~earned.gpm,data = team)
-summary(treeTeamEGPM)
-treeTeamInhib = tree(result~inhibitors, data = team)
-summary(treeTeamInhib)
+test=team[-train,"result"]
+yhat=predict(treeTeam,newdata=team[-train,])
+mean((yhat-test)^2)
+
+treeTeam15 = tree(result~golddiffat15+firsttothreetowers,data=team,subset=train)
+summary(treeTeam15)
+yhat15=predict(treeTeam15,newdata=team[-train,])
+mean((yhat15-test)^2)
+
+treeKDA = tree(result~kills+deaths+assists,data=team,subset=train)
+summary(treeKDA)
+yhatKDA=predict(treeKDA,newdata=team[-train,])
+mean((yhatKDA-test)^2)
 
 # smells
 plot(treeTeam)
@@ -105,8 +99,21 @@ lla = data[which(data$league == "LLA"),]
 ljl = data[which(data$league == "LJL"),]
 
 champCols = data[c("ban1","ban2","ban3","ban4","ban5", "champion")]
+lcs[1:20]
 
+library(elo)
+# datapoints that matter.
+# gold earned
+# gamelength
+# For top, bot, mid: cspm, KDA, 
 
-
-
-
+View(lcs)
+treeTeamFT=tree(result~firsttower,data = team)
+summary(treeTeamFT)
+treeTeamFT3 = tree(result~firsttothreetowers, data = team)
+summary(treeTeamFT3)
+treeTeamEGPM=tree(result~earned.gpm,data = team)
+summary(treeTeamEGPM)
+treeTeamInhib = tree(result~inhibitors, data = team)
+summary(treeTeamInhib)
+treeTeam
